@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Title -->
+    <title>Netflix Dashboard</title>
+    <!-- External CSS Files -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/light-bootstrap-dashboard.css?v=2.0.0">
+    <style>
+        body {
+            transform: scale(1.0);
+            transform-origin: 0 0;
+            background-image: url('{{ url_for('static', filename='img/5.jpg') }}');
+        }
+
+        .sidebar-nav {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar-nav li {
+            display: flex;
+            align-items: center;
+            margin: 20px 5px;
+        }
+
+        .sidebar-nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-menu a {
+            color: #790cd7;
+            font-size: 16px;
+        }
+
+        .sidebar-nav a {
+            text-decoration: dotted;
+            padding: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            color: #fff;
+            font-size: 18px;
+            transition: color 0.3s ease;
+            flex-grow: 1;
+        }
+
+        .sidebar-nav a:hover {
+            color: #dcdcdc;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 600px;
+        }
+
+        #toggleButtonCsv {
+            background-color: #d30808bd;
+            color: white;
+            position: absolute;
+            bottom: 2px;
+        }
+
+        #toggleButtonCsv.toggled {
+            background-color: #265179ec;
+            color: white;
+        }
+
+        .toggleSwitch {
+            width: 40px;
+            height: 20px;
+            margin-bottom: 20px;
+            background-color: #ccc;
+            border-radius: 10px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .toggleSwitch::before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            transition: transform 0.3s;
+        }
+
+        .toggleSwitch.active {
+            background-color: #d31212;
+        }
+
+        .toggleSwitch.active::before {
+            transform: translateX(20px);
+        }
+
+        .hidden {
+            display: none;
+        }
+           /* Add this CSS in your existing style block */
+  
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="sidebar" data-image="../assets/img/" data-color="red">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a href="#chart1" class="simple-text">Netflix Analytics</a>
+
+                    
+
+                </div>
+                <ul class="nav">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/">
+                            <i class="nc-icon nc-chart-pie-35"></i>
+                            <p>Home</p>
+                        </a>
+                        <br>
+                        <h6>_______Prebuilt Charts_________</h6><br>
+                        <ul class="sidebar-nav">
+                            <li>
+                                <a href="#chart1" id="toggleButton4" class="toggleButton">Language in %</a>
+                                <div class="toggleSwitch" id="switch4"></div>
+                            </li>
+                            <li>
+                                <a href="#chart2" id="toggleButton3" class="toggleButton">Genre/Score</a>
+                                <div class="toggleSwitch" id="switch3"></div>
+                            </li>
+                            <li>
+                                <a href="#chart4" id="toggleButton2" class="toggleButton">Premiere Month %</a>
+                                <div class="toggleSwitch" id="switch2"></div>
+                            </li>
+                            <li>
+                                <a href="#chart5" id="toggleButton5" class="toggleButton">Yearly Trends</a>
+                                <div class="toggleSwitch" id="switch5"></div>
+                            </li>
+                        </ul>
+
+                        <h6>_________________________________</h6>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="recom">
+                            <i class="nc-icon nc-circle-09"></i>
+                            <p>Recommendations</p>
+                        </a>
+                    </li>
+                    <li id="pred">
+                        <a class="nav-link" href="predic">
+                            <i class="nc-icon nc-circle-09"></i>
+                            <p>Predictions</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item active">
+                        <a href="#chart3">
+                            <button id="toggleButtonCsv" class="nav-link" style="margin-left: 50px;">Show CSV Data</button>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="main-panel">
+            <nav class="navbar navbar-expand-lg" color-on-scroll="500">
+                <div class="container-fluid" style="background-image: url('{{ url_for('static', filename='img/1.jpg') }}');">
+                    <a class="navbar-brand" href="#pablo">Analysis</a>
+                </div>
+            </nav>
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="col-md-12" id="chart6" style="margin-left: 5px;">
+                        <div class="card" style="height:1500px;background-color: rgba(255, 255, 255, 0.9);">
+                            <div class="card-header" style="margin-left: 450px; ">
+                                <h4 class="card-title">Build Your Own</h4>
+                            </div>
+                            <div class="card-body" style="margin-left: 450px;">
+                                <h2 class="card-title">Bar Chart</h2>
+                                <form id="chartForm">
+                                    <div class="form-group">
+                                        <label for="xAxisColumn">Select X-Axis Column:</label>
+                                        <select class="form-control" id="xAxisColumn" style="width: 50%;">
+                                            {% for column_name in column_names %}
+                                            <option value="{{ column_name }}">{{ column_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="yAxisColumn">Select Y-Axis Column:</label>
+                                        <select class="form-control" id="yAxisColumn" style="width: 50%;">
+                                            {% for column_name in column_names %}
+                                            <option value="{{ column_name }}">{{ column_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="numRows">Number of Rows:</label>
+                                        <input class="form-control" type="number" id="numRows" name="numRows" min="1"
+                                            value="10" style="width: 50%;">
+                                    </div>
+                                    <button type="button" class="btn btn-primary"
+                                        onclick="generateCustomChart()">Generate Chart</button>
+                                </form>
+                            </div>
+                            <br>
+                            <div class="card-footer" id="custom_chart" style="height: 1000px; margin-right: 35px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="chart1" style="margin-left: 20px; display: none;">
+                        <div class="card" style="height:700px;">
+                            <div class="card-header">
+                                <h4 class="card-title">Language in %</h4>
+                                <p class="card-category">Distribution of Languages in Netflix Content</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="pie_chart" style="width: 1000px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="chart2" style="margin-left: 20px; display: none;">
+                        <div class="card" style="height:800px;">
+                            <div class="card-header">
+                                <h4 class="card-title">Genre/Score</h4>
+                                <p class="card-category">Average IMDB Score by Genre</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="bar_chart" style="width: 1500px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="chart4" style="margin-left: 20px; display: none;">
+                        <div class="card" style="height:800px;">
+                            <div class="card-header">
+                                <h4 class="card-title">Premiere Month %</h4>
+                                <p class="card-category">Distribution of Premiere Months</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="premiere_Chart" style="width: 1500px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="chart5" style="margin-left: 20px; display: none;">
+                        <div class="card" style="height:800px;">
+                            <div class="card-header">
+                                <h4 class="card-title">Yearly Trend of IMDB Scores</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="plot" style="width: 1500px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="chart3" style="display: none;background-color: rgba(255, 255, 255, 0.9);">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">CSV Data</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead class="text-primary">
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Genre</th>
+                                                <th>Premiere</th>
+                                                <th>Runtime</th>
+                                                <th>IMDB Score</th>
+                                                <th>Language</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for index, row in csv_data.iterrows() %}
+                                            <tr>
+                                                <td>{{ row['Title'] }}</td>
+                                                <td>{{ row['Genre'] }}</td>
+                                                <td>{{ row['Premiere'] }}</td>
+                                                <td>{{ row['Runtime'] }}</td>
+                                                <td>{{ row['IMDB Score'] }}</td>
+                                                <td>{{ row['Language'] }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer></footer>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        // Toggle button for showing CSV Data
+        document.getElementById('toggleButtonCsv').addEventListener('click', function () {
+            const chartDiv = document.getElementById('chart3');
+            chartDiv.style.display = chartDiv.style.display === 'none' || chartDiv.style.display === '' ? 'block' : 'none';
+        });
+
+        // Function to toggle the display of chart divs and switch state
+        function toggleDisplay(buttonId, chartId, switchId) {
+            const chartDiv = document.getElementById(chartId);
+            const toggleSwitch = document.getElementById(switchId);
+            const isHidden = chartDiv.style.display === 'none' || chartDiv.style.display === '';
+            chartDiv.style.display = isHidden ? 'block' : 'none';
+            toggleSwitch.classList.toggle('active', isHidden);
+        }
+
+        // Add event listeners to buttons
+        const buttons = [
+            { buttonId: 'toggleButton4', chartId: 'chart1', switchId: 'switch4' },
+            { buttonId: 'toggleButton3', chartId: 'chart2', switchId: 'switch3' },
+            { buttonId: 'toggleButton2', chartId: 'chart4', switchId: 'switch2' },
+            { buttonId: 'toggleButton5', chartId: 'chart5', switchId: 'switch5' }
+        ];
+
+        buttons.forEach(({ buttonId, chartId, switchId }) => {
+            document.getElementById(buttonId).addEventListener('click', () => toggleDisplay(buttonId, chartId, switchId));
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Parse JSON data for the charts
+        const barChartData = JSON.parse('{{ bar_chart | safe }}');
+        const languagePieData = JSON.parse('{{ language_pie_chart | safe }}');
+        const premierePieData = JSON.parse('{{ Premiere_pie_chart | safe }}');
+        const plot_data = JSON.parse('{{ plot_json|safe }}');
+
+        // Render bar chart on page load
+        Plotly.newPlot('bar_chart', barChartData, {}, { responsive: true });
+
+        // Render pie chart on page load
+        Plotly.newPlot('pie_chart', languagePieData, {}, { responsive: true });
+        Plotly.newPlot('premiere_Chart', premierePieData, {}, { responsive: true });
+
+        Plotly.newPlot('plot', plot_data.data, plot_data.layout);
+
+        // Function to generate custom chart
+        function generateCustomChart() {
+            const xAxisColumn = document.getElementById('xAxisColumn').value;
+            const yAxisColumn = document.getElementById('yAxisColumn').value;
+            const numRows = document.getElementById('numRows').value;
+
+            fetch('/generate_chart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    xAxisColumn: xAxisColumn,
+                    yAxisColumn: yAxisColumn,
+                    numRows: numRows
+                })
+            })
+            .then(response => response.json())
+            .then(chartData => {
+                Plotly.newPlot('custom_chart', JSON.parse(chartData), {}, { responsive: true });
+            })
+            .catch(error => console.error('Error generating custom chart:', error));
+        }
+    </script>
+
+    
+</body>
+
+</html>

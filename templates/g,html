@@ -1,0 +1,103 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Left column with prediction form -->
+            <h1>IMDB Score Prediction</h1>
+            <form method="post">
+                <!-- Form content -->
+                <form method="post" >
+                    <label for="genre">Select Genre:</label>
+                    <select id="genre" name="genre">
+                        {% for genre in genres %}
+                        <option value="{{ genre }}">{{ genre }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <label for="month">Select Month:</label>
+                    <select id="month" name="month">
+                        {% for month in months %}
+                        <option value="{{ month }}">{{ month }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <label for="runtime">Enter Runtime (minutes):</label>
+                    <input type="number" id="runtime" name="runtime" min="1" required>
+            
+                    <label for="model">Select Model:</label>
+                    
+                    <select id="model" name="model">
+                        <option value="rf" {% if selected_model == 'rf' %}selected{% endif %}>Random Forest</option>
+                        <option value="gb" {% if selected_model == 'gb' %}selected{% endif %}>Gradient Boosting</option>
+                        <option value="svr" {% if selected_model == 'svr' %}selected{% endif %}>SVR</option>
+                        <option value="ensemble" {% if selected_model == 'ensemble' %}selected{% endif %}>Ensemble</option>
+                        <option value="all" {% if selected_model == 'all' %}selected{% endif %}>All Models</option>
+                    </select>
+                    
+                    
+                    
+                    <button type="submit">Predict</button>
+                </form>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <!-- Right column with prediction results -->
+            {% if predicted_score is not none %}
+            <div class="container">
+                <h2>Prediction Result:</h2>
+                <p><b>Model:</b>
+                    {% if selected_model == 'rf' %}
+                    Random Forest
+                    {% elif selected_model == 'gb' %}
+                    Gradient Boosting
+                    {% elif selected_model == 'svr' %}
+                    SVR
+                    {% elif selected_model == 'ensemble' %}
+                    Ensemble
+                    {% elif selected_model == 'all' %}
+                    All Models
+                    {% endif %}
+                </p>
+                <p><b>Predicted IMDb Score:</b> {{ predicted_score }}</p>
+                {% if rmse is not none and mae is not none %}
+                <p><b>RMSE:</b> {{ rmse }}</p>
+                <p><b>MAE:</b> {{ mae }}</p>
+                {% endif %}
+                
+                {% if selected_model == 'all' %}
+                <h2>Prediction Results for All Models:</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Predicted IMDb Score</th>
+                            <th>RMSE</th>
+                            <th>MAE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>
+                                {% if result[0] == 'rf' %}
+                                Random Forest
+                                {% elif result[0] == 'gb' %}
+                                Gradient Boosting
+                                {% elif result[0] == 'svr' %}
+                                SVR
+                                {% elif result[0] == 'ensemble' %}
+                                Ensemble
+                                {% endif %}
+                            </td>
+                            <td>{{ result[1] }}</td>
+                            <td>{{ result[2] }}</td> <!-- RMSE value -->
+                            <td>{{ result[3] }}</td> <!-- MAE value -->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

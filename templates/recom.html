@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Netflix Dashboard </title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/light-bootstrap-dashboard.css?v=2.0.0">
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.ico">
+
+
+    <style>
+        .form-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            
+        }
+
+        body {
+            transform: scale(1.0);
+            transform-origin: 0 0;
+            background-image: url('{{ url_for('static', filename='img/5.jpg') }}');
+           
+            
+
+        }
+
+        .footer-menu a {
+            color: #790cd7;
+            font-size: 16px;
+
+        }
+
+        .form-section,
+        .results-section {
+            width: 48%;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .top-ten ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .top-ten li {
+            margin: 5px 0;
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        .custom-select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .custom-button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .custom-button:hover {
+            background-color: #0056b3;
+        }
+
+
+        /* Original button color */
+        #toggleButton {
+            background-color: #d30808bd;
+            /* Blue */
+            color: white;
+            position: absolute;
+            bottom: 2px;
+            /* Adjust bottom padding as needed */
+
+        }
+
+
+
+        /* Toggled button color */
+        #toggleButton.toggled {
+            background-color: #265179ec;
+            /* Green */
+            color: white;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 600px;
+            
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="sidebar" data-image="../assets/img/sidebar-5.jpg" data-color="red">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a class="simple-text">Netflix Analytics</a>
+                </div>
+                <ul class="nav">
+                    <li><a class="nav-link" href="/"><i class="nc-icon nc-chart-pie-35"></i>
+                            <p>Home</p>
+                        </a></li>
+                    <li class="nav-item active"><a class="nav-link"><i class="nc-icon nc-circle-09"></i>
+                            <p>Recommendations</p>
+                        </a></li>
+                    <li><a class="nav-link" href="/predic"><i class="nc-icon nc-circle-09"></i>
+                            <p>Predictions</p>
+                        </a></li>
+
+                    <li class="nav-item active"><a href="#chart3"><button id="toggleButton" class="nav-link" style="margin-left: 50px;">Show CSV Data</button></a></li>
+                </ul>
+            </div>
+        </div>
+<div class="main-panel" >
+    <nav class="navbar navbar-expand-lg" color-on-scroll="500">
+        <div class="container-fluid" style="background-image: url('{{ url_for('static', filename='img/1.jpg') }}');">
+            <a class="navbar-brand" href="#pablo">Movie Recommendation</a>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navigation-index" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                <span></span>
+                <span class="navbar-toggler-bar burger-lines"></span>
+                <span class="navbar-toggler-bar burger-lines"></span>
+                <span class="navbar-toggler-bar burger-lines"></span>
+            </button>
+                </div>
+            </nav>
+            <link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}">
+            <div class="form-container " style="width: auto; background-color: rgba(255, 255, 255, 0.6);">
+                <div class="form-section" >
+                    <form action="/recom" method="POST" >
+                        <h1>Select a Genre</h1>
+                        <select class="custom-select" name="genre">
+                            <option value="">All Genres</option>
+                            {% for value in unique_genres %}
+                            <option value="{{ value }}" {% if selected_genre==value %}selected{% endif %}>{{ value }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <h1>Select a Language</h1>
+                        <select class="custom-select" name="language">
+                            <option value="">All Languages</option>
+                            {% for value in unique_languages %}
+                            <option value="{{ value }}" {% if selected_language==value %}selected{% endif %}>{{ value }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button class="custom-button" type="submit">Submit</button>
+                        {% if no_movies_message %}
+                    <div class="error-message">{{ no_movies_message }}</div>
+                    {% else %}
+                    {% if title_with_highest_rating %}
+                    <h2><b>Title with Highest Rating:</b></h2>
+                    <h1>{{ title_with_highest_rating }}</h1>
+                    {% endif %}
+                    <div class="top-ten">
+                        <h2>Top Ten Movies:</h2>
+                        <ul>
+                            {% for movie in top_ten_movies %}
+                            <li>{{ movie }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    </form>
+                </div>
+                <div class="results-section">
+                    <h1 style="text-align: center;">Movie Search</h1>
+                <form method="POST" class="search-form">
+                    <label for="title">Search by Title:</label>
+                    <input type="text" id="title" name="title" required>
+                    <button type="submit">Search</button>
+                </form>
+                {% if results %}
+                <h2 style="text-align: center;">Results:</h2>
+                <div class="results1">
+                    {% for movie in results %}
+                    <div class="card1">
+                        <h3>{{ movie['Title'] }}</h3>
+                        <p><strong>Genre:</strong> {{ movie['Genre'] }}</p>
+                        <p><strong>Premiere:</strong> {{ movie['Premiere'] }}</p>
+                        <p><strong>Runtime:</strong> {{ movie['Runtime'] }}</p>
+                        <p><strong>IMDB Score:</strong> {{ movie['IMDB Score'] }}</p>
+                        <p><strong>Language:</strong> {{ movie['Language'] }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                    
+                </div>
+                <br>
+
+
+            </div>
+
+
+
+            <footer style="text-align: center;">_______________________________________________________</footer>
+
+
+
+
+
+
+
+
+
+
+            <div id="chart3" style="display: none;background-color: rgba(255, 255, 255, 0.9); ">
+                <div class="card3">
+                    <div class="card-header">
+                        <h4 class="card-title">CSV Data</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="text-primary">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Genre</th>
+                                        <th>Premiere</th>
+                                        <th>Runtime</th>
+                                        <th>IMDB Score</th>
+                                        <th>Language</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for index, row in csv_data.iterrows() %}
+                                    <tr>
+                                        <td>{{ row['Title'] }}</td>
+                                        <td>{{ row['Genre'] }}</td>
+                                        <td>{{ row['Premiere'] }}</td>
+                                        <td>{{ row['Runtime'] }}</td>
+                                        <td>{{ row['IMDB Score'] }}</td>
+                                        <td>{{ row['Language'] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('toggleButton').addEventListener('click', function () {
+            const chartDiv = document.getElementById('chart3');
+            const toggleButton = document.getElementById('toggleButton');
+            if (chartDiv.style.display === 'none') {
+                chartDiv.style.display = 'block';
+                toggleButton.classList.add('active');
+            } else {
+                chartDiv.style.display = 'none';
+                toggleButton.classList.remove('active');
+            }
+        });
+
+        document.getElementById('toggleButton').addEventListener('click', function () {
+            this.classList.toggle('toggled');
+        });
+    </script>
+</body>
+
+</html>
